@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dev AI — DeepSeek V3</title>
+    <title>Dev AI — OpenRouter</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -21,11 +21,8 @@
         .user-msg { align-self: flex-end; background: #262626; color: white; border-bottom-right-radius: 4px; }
         .ai-msg { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid #333; color: #e5e5e5; border-bottom-left-radius: 4px; }
         
-        /* Markdown Styling */
         .ai-msg pre { background: #0f0f0f !important; padding: 1em; border-radius: 8px; margin: 10px 0; overflow-x: auto; border: 1px solid #222; }
         .ai-msg code { font-family: 'Fira Code', monospace; font-size: 0.9em; }
-        .ai-msg p { margin-bottom: 0.5em; }
-        .ai-msg ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 0.5em; }
 
         .v0-textarea { width: 100%; padding: 16px; resize: none; background: transparent; border: none; color: white; font-size: 15px; outline: none; min-height: 60px; }
         .send-btn { padding: 8px; border-radius: 8px; border: 1px solid #262626; color: #525252; transition: all 0.2s; }
@@ -44,10 +41,10 @@
         <div class="mt-auto space-y-6 pb-10">
             <h1 id="main-title" class="text-3xl font-bold text-white tracking-tight">What can I help you ship?</h1>
             <div class="relative bg-neutral-900/70 backdrop-blur-2xl rounded-2xl border border-neutral-800 shadow-2xl">
-                <textarea id="v0-chat" placeholder="Ask DeepSeek-V3..." class="v0-textarea"></textarea>
+                <textarea id="v0-chat" placeholder="Ask DeepSeek via OpenRouter..." class="v0-textarea"></textarea>
                 <div class="flex items-center justify-between p-3 border-t border-neutral-800/40">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] text-zinc-600 font-mono tracking-widest uppercase px-2">GitHub / DeepSeek-V3</span>
+                        <span class="text-[10px] text-zinc-600 font-mono tracking-widest uppercase px-2">OpenRouter / DeepSeek-V3</span>
                     </div>
                     <button id="send-btn" class="send-btn">
                         <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
@@ -58,9 +55,9 @@
     </main>
 
     <script type="module">
-        const TOKEN = "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";
-        const ENDPOINT = "https://models.inference.ai.azure.com/chat/completions";
-        const MODEL = "DeepSeek-V3";
+        const OPENROUTER_KEY = "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";
+        const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+        const MODEL = "deepseek/deepseek-chat"; 
 
         const textarea = document.getElementById('v0-chat');
         const sendBtn = document.getElementById('send-btn');
@@ -91,16 +88,21 @@
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${TOKEN}`
+                        "Authorization": `Bearer ${OPENROUTER_KEY}`,
+                        "HTTP-Referer": window.location.href, // Required by OpenRouter
+                        "X-Title": "Dev AI Ship"
                     },
                     body: JSON.stringify({
-                        messages: [{ role: "user", content: text }],
                         model: MODEL,
+                        messages: [{ role: "user", content: text }],
                         stream: true
                     })
                 });
 
-                if (!response.ok) throw new Error();
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error?.message || "Connection failed");
+                }
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
@@ -114,25 +116,27 @@
                     const lines = chunk.split("\n");
 
                     for (const line of lines) {
-                        if (line.startsWith("data: ") && line !== "data: [DONE]") {
-                            try {
-                                const json = JSON.parse(line.substring(6));
-                                const content = json.choices[0].delta.content;
-                                if (content) {
-                                    fullText += content;
-                                    // Parse Markdown and Highlight Code
-                                    aiDiv.innerHTML = marked.parse(fullText) + '<span class="cursor"></span>';
-                                    Prism.highlightAllUnder(aiDiv);
-                                    chatHistory.scrollTop = chatHistory.scrollHeight;
-                                }
-                            } catch (e) {}
+                        const cleanLine = line.replace(/^data: /, "").trim();
+                        if (!cleanLine || cleanLine === "[DONE]") continue;
+
+                        try {
+                            const json = JSON.parse(cleanLine);
+                            const content = json.choices[0]?.delta?.content;
+                            if (content) {
+                                fullText += content;
+                                aiDiv.innerHTML = marked.parse(fullText) + '<span class="cursor"></span>';
+                                Prism.highlightAllUnder(aiDiv);
+                                chatHistory.scrollTop = chatHistory.scrollHeight;
+                            }
+                        } catch (e) {
+                            console.error("Error parsing chunk", e);
                         }
                     }
                 }
                 aiDiv.querySelector('.cursor')?.remove();
 
             } catch (err) {
-                aiDiv.innerHTML = `<span class="text-red-400">Error: Verification failed. Please ensure the GitHub token is active.</span>`;
+                aiDiv.innerHTML = `<span class="text-red-400">Error: ${err.message}</span>`;
             }
         }
 
@@ -148,7 +152,7 @@
     </script>
 
     <script>
-        // Smooth BG Shader
+        // Shader Background logic
         const canvas = document.querySelector('#shader-canvas');
         const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -173,10 +177,6 @@
         scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
         function animate(t) { uniforms.time.value = t * 0.001; renderer.render(scene, camera); requestAnimationFrame(animate); }
         animate();
-        window.addEventListener("resize", () => {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            uniforms.resolution.value = [window.innerWidth, window.innerHeight];
-        });
     </script>
 </body>
 </html>
