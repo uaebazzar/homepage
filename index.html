@@ -3,58 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dev AI — Build Today</title>
+    <title>Dev AI — Ship</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;400;800&family=JetBrains+Mono&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
         body { 
-            background: #0f0f0f; 
+            background: #000; 
             color: #fff; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
+            font-family: 'Inter', sans-serif; 
             margin: 0; 
             overflow: hidden; 
-        }
-
-        /* Ray Background Styles */
-        .ray-container {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .ray-gradient {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4000px;
-            height: 1800px;
-            background: radial-gradient(circle at center 800px, rgba(20, 136, 252, 0.4) 0%, rgba(20, 136, 252, 0.15) 14%, rgba(20, 136, 252, 0.08) 22%, transparent 35%);
-        }
-
-        /* Glass Input Styles */
-        .chat-container {
-            position: relative;
-            z-index: 20;
-            width: 100%;
-            max-width: 720px;
-            padding: 0 20px;
-        }
-
-        .chat-input-box {
-            background: #1e1e22;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-            transition: border-color 0.3s ease;
-        }
-
-        .chat-input-box:focus-within {
-            border-color: rgba(20, 136, 252, 0.5);
+            height: 100vh;
         }
 
         #shader-canvas {
@@ -62,123 +22,141 @@
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             z-index: -1;
-            opacity: 0.3; /* Subtle glow behind the rays */
+            opacity: 0.2;
         }
 
-        .rainbow-btn {
-            background: #1488fc;
-            box-shadow: 0 0 20px rgba(20, 136, 252, 0.3);
-            transition: all 0.2s ease;
+        .v0-textarea {
+            width: 100%;
+            padding: 16px;
+            resize: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 15px;
+            outline: none;
+            min-height: 60px;
+            line-height: 1.5;
         }
 
-        .rainbow-btn:hover {
-            background: #1a94ff;
-            transform: scale(1.02);
+        .v0-textarea::placeholder { color: #525252; }
+
+        .send-btn {
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #262626;
+            color: #525252;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
+        .send-btn.active {
+            background: white;
+            color: black;
+            border-color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Hide scrollbar for clean look */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
     <canvas id="shader-canvas"></canvas>
-    <div class="ray-container">
-        <div class="ray-gradient"></div>
-    </div>
 
-    <main class="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+    <main class="flex flex-col items-center w-full max-w-3xl mx-auto p-6 pb-16 h-full justify-end space-y-6 relative z-10">
         
-        <div class="mb-12 animate-fade-in">
-            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                <span class="text-xs font-semibold text-blue-200">Introducing Dev AI V2</span>
-            </div>
-        </div>
-
-        <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
-            What will you <span class="italic bg-gradient-to-b from-blue-400 to-white bg-clip-text text-transparent">build</span> today?
+        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight w-full text-left">
+            What can I help you ship?
         </h1>
-        <p class="text-gray-400 text-lg font-medium mb-10 max-w-lg">
-            Create stunning apps & websites by chatting with AI.
-        </p>
 
-        <div class="chat-container">
-            <div class="chat-input-box p-4">
-                <textarea 
-                    placeholder="What do you want to build?" 
-                    class="w-full bg-transparent border-none outline-none text-white placeholder-gray-600 resize-none min-h-[80px]"
-                ></textarea>
-                
-                <div class="flex items-center justify-between mt-2 pt-2 border-t border-white/5">
-                    <div class="flex items-center gap-3">
-                        <button class="text-gray-500 hover:text-white transition-colors">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        <div class="w-full">
+            <div class="relative bg-neutral-900/60 backdrop-blur-xl rounded-2xl border border-neutral-800 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <div class="overflow-y-auto">
+                    <textarea 
+                        id="v0-chat" 
+                        placeholder="Ask Dev AI a question..." 
+                        class="v0-textarea scrollbar-hide"
+                    ></textarea>
+                </div>
+
+                <div class="flex items-center justify-between p-3 border-t border-neutral-800/40">
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="p-2 hover:bg-neutral-800 rounded-lg text-neutral-400 hover:text-white transition-all group flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                            <span class="text-[10px] hidden group-hover:inline opacity-70">Attach</span>
                         </button>
-                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-xs text-gray-400 font-medium">
-                            <span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Sonnet 4.5
-                        </div>
                     </div>
                     
-                    <button class="rainbow-btn px-6 py-2 rounded-full text-sm font-bold flex items-center gap-2">
-                        Build now
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-                    </button>
+                    <div class="flex items-center gap-3">
+                        <button type="button" class="px-3 py-1.5 rounded-lg text-[11px] font-medium text-zinc-400 border border-dashed border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800/50 transition-all flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Project
+                        </button>
+                        <button id="send-btn" type="button" class="send-btn">
+                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18"></path></svg>
+                        </button>
+                    </div>
                 </div>
-            </div>
-
-            <div class="mt-8 flex items-center justify-center gap-4 text-sm text-gray-500">
-                <span>or import from</span>
-                <button class="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 hover:bg-white/5 transition-all">
-                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
-                    GitHub
-                </button>
-                <button class="flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 hover:bg-white/5 transition-all">
-                    Figma
-                </button>
             </div>
         </div>
     </main>
 
     <script>
-        const canvas = document.querySelector('#shader-canvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: "high-performance" });
-        renderer.setPixelRatio(1.0);
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        const textarea = document.getElementById('v0-chat');
+        const sendBtn = document.getElementById('send-btn');
+        const minHeight = 60;
+        const maxHeight = 240;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, -1);
+        textarea.addEventListener('input', () => {
+            // Auto-resize
+            textarea.style.height = minHeight + 'px';
+            const newHeight = Math.min(textarea.scrollHeight, maxHeight);
+            textarea.style.height = newHeight + 'px';
+            textarea.style.overflowY = textarea.scrollHeight > maxHeight ? 'auto' : 'hidden';
 
-        const fragmentShader = `
-          precision highp float;
-          uniform vec2 resolution;
-          uniform float time;
-          void main() {
-            vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
-            float d = length(p) * 0.05;
-            float r = 0.05 / abs(p.y + sin((p.x * (1.0 + d) + time)) * 0.5);
-            float g = 0.05 / abs(p.y + sin((p.x + time)) * 0.5);
-            float b = 0.05 / abs(p.y + sin((p.x * (1.0 - d) + time)) * 0.5);
-            gl_FragColor = vec4(r * 0.5, g * 0.5, b * 0.8, 1.0);
-          }
-        `;
-
-        const uniforms = { resolution: { value: [window.innerWidth, window.innerHeight] }, time: { value: 0.0 } };
-        const material = new THREE.RawShaderMaterial({
-            vertexShader: `attribute vec3 position; void main() { gl_Position = vec4(position, 1.0); }`,
-            fragmentShader,
-            uniforms
+            // Button toggle
+            if (textarea.value.trim() !== "") {
+                sendBtn.classList.add('active');
+            } else {
+                sendBtn.classList.remove('active');
+            }
         });
 
+        // Background Shader Logic
+        const canvas = document.querySelector('#shader-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+        renderer.setPixelRatio(1.0);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, -1);
+        const fragmentShader = `
+          precision highp float;
+          uniform vec2 resolution; uniform float time;
+          void main() {
+            vec2 p = (gl_FragCoord.xy * 2.0 - resolution) / min(resolution.x, resolution.y);
+            float r = 0.04 / abs(p.y + sin((p.x * 1.1 + time)) * 0.4);
+            float g = 0.04 / abs(p.y + sin((p.x + time)) * 0.4);
+            float b = 0.06 / abs(p.y + sin((p.x * 0.9 + time)) * 0.4);
+            gl_FragColor = vec4(r, g, b, 1.0);
+          }
+        `;
+        const uniforms = { resolution: { value: [window.innerWidth, window.innerHeight] }, time: { value: 0.0 } };
+        const material = new THREE.RawShaderMaterial({ 
+            vertexShader: `attribute vec3 position; void main() { gl_Position = vec4(position, 1.0); }`,
+            fragmentShader, uniforms 
+        });
         scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material));
-
-        function animate(t) {
-            uniforms.time.value = t * 0.001;
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
+        
+        function animate(t) { 
+            uniforms.time.value = t * 0.001; 
+            renderer.render(scene, camera); 
+            requestAnimationFrame(animate); 
         }
         
         window.addEventListener("resize", () => {
             renderer.setSize(window.innerWidth, window.innerHeight);
             uniforms.resolution.value = [window.innerWidth, window.innerHeight];
         });
-        
         requestAnimationFrame(animate);
     </script>
 </body>
